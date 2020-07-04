@@ -68,7 +68,8 @@
     <Compile Include="Assets\FastIK\Scripts\Sample\SampleProcedualAnimation.cs" />
     <Compile Include="Assets\FastIK\Scripts\Sample\SampleRotator.cs" />
     <Compile Include="Assets\FastIK\Scripts\Sample\SampleSinMover.cs" />
-    <Compile Include="Assets\LegStepper.cs" />
+    <Compile Include="Assets\Scripts\Easing.cs" />
+    <Compile Include="Assets\Scripts\LegStepper.cs" />
     <Compile Include="Assets\Scripts\SpiderController.cs" />
     <None Include="Assets\FastIK\Documentation.txt" />
     <Reference Include="UnityEngine">
