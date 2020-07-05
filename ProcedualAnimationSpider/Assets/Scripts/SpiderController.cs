@@ -14,25 +14,24 @@ public class SpiderController : MonoBehaviour
     [SerializeField] private float headClampAngel;
 
     //Legs
-    [SerializeField] LegStepper frontLeftLegStepper;
-    [SerializeField] LegStepper midLeftLegStepper;
-    [SerializeField] LegStepper backLeftLegStepper;
-    [SerializeField] LegStepper frontRightLegStepper;
-    [SerializeField] LegStepper midRightLegStepper;
-    [SerializeField] LegStepper backRightLegStepper;
+    [SerializeField] private LegStepper frontLeftLegStepper;
+    [SerializeField] private LegStepper midLeftLegStepper;
+    [SerializeField] private LegStepper backLeftLegStepper;
+    [SerializeField] private LegStepper frontRightLegStepper;
+    [SerializeField] private LegStepper midRightLegStepper;
+    [SerializeField] private LegStepper backRightLegStepper;
 
 
-    Rigidbody rigidbody;
-    Vector3 forwardSpeed = new Vector3(0, 0, 1);
-    float maxSpeed = 4;
-    Quaternion startRotation = Quaternion.identity;
+    private Vector3 forwardSpeed = new Vector3(0, 0, 1);
+    private float maxSpeed = 4;
+    private Quaternion startRotation = Quaternion.identity;
 
-    Vector3 dir;
+    private Vector3 dir;
+    private RaycastHit rayHit;
 
     private void Awake()
     {
         StartCoroutine(LegUpdateCoroutine());
-        rigidbody = GetComponent<Rigidbody>();
 
     }
 
@@ -40,12 +39,14 @@ public class SpiderController : MonoBehaviour
 
     private void Update()
     {
-        //transform.rotation.z = startRotation.z;
 
-
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S))
         {
             transform.position += this.transform.forward * 10 * Time.deltaTime;
+
+        }else if(Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
+        {
+            transform.position += this.transform.forward * -10 * Time.deltaTime;
 
         }
 
@@ -66,34 +67,54 @@ public class SpiderController : MonoBehaviour
 
         while (true)
         {
+
+            midLeftLegStepper.TryToMove();
+            midRightLegStepper.TryToMove();
+
+
             do
             {
                 frontLeftLegStepper.TryToMove();
-                backLeftLegStepper.TryToMove();
+                midRightLegStepper.TryToMove();
 
-                frontRightLegStepper.TryToMove();
                 backRightLegStepper.TryToMove();
                 yield return null;
 
-            } while (backLeftLegStepper.isMoving || frontLeftLegStepper.isMoving || backRightLegStepper.isMoving || frontRightLegStepper.isMoving);
+            } while (frontLeftLegStepper.isMoving || backRightLegStepper.isMoving);
+
             do
             {
                 midLeftLegStepper.TryToMove();
-                midRightLegStepper.TryToMove();
+
+                frontRightLegStepper.TryToMove();
+                backLeftLegStepper.TryToMove();
+
                 yield return null;
-            } while (midLeftLegStepper.isMoving || midRightLegStepper.isMoving);
+            } while (frontRightLegStepper.isMoving || backLeftLegStepper.isMoving);
+
+
         }
     }
     
 
     private void LateUpdate()
     {
+        HeadTracking();
+
+    }
+
+    private void HeadTracking()
+    {
         Quaternion currentLocalRotation = headBone.localRotation;
 
         headBone.localRotation = Quaternion.identity;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        Vector3 worldTargetLookDir = target.position - headBone.position;
-        Vector3 localTargetLookDir = headBone.parent.InverseTransformDirection(worldTargetLookDir);
+        Physics.Raycast(ray, out rayHit, 100f);
+        Vector3 worldTargetLookDir = rayHit.point -  headBone.position;
+
+        //Vector3 worldTargetLookDir = target.position - headBone.position;
+        Vector3 localTargetLookDir = headBone.InverseTransformDirection(worldTargetLookDir);
 
 
         localTargetLookDir = Vector3.RotateTowards(
@@ -104,12 +125,9 @@ public class SpiderController : MonoBehaviour
 
         Quaternion localTargetRotation = Quaternion.LookRotation(localTargetLookDir, transform.up);
 
-        headBone.rotation = Quaternion.Slerp(currentLocalRotation, 
+        headBone.localRotation = Quaternion.Slerp(currentLocalRotation,
             localTargetRotation,
             1 - Mathf.Exp(-headTurningSpeed * Time.deltaTime));
-
-
     }
-
 
 }
