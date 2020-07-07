@@ -111,7 +111,7 @@ public class SpiderController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         Physics.Raycast(ray, out rayHit, 100f);
-        Vector3 worldTargetLookDir = rayHit.point -  headBone.position;
+        Vector3 worldTargetLookDir = rayHit.point - headBone.position;
 
         //Vector3 worldTargetLookDir = target.position - headBone.position;
         Vector3 localTargetLookDir = headBone.InverseTransformDirection(worldTargetLookDir);
