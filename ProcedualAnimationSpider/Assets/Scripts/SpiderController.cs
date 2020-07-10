@@ -95,7 +95,7 @@ public class SpiderController : MonoBehaviour
 
         }
     }
-    
+
 
     private void LateUpdate()
     {
